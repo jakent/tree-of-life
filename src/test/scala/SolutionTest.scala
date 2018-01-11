@@ -5,10 +5,10 @@ import scala.io.Source
 class SolutionTest extends FlatSpec with Matchers {
 
   "Tree of Life" should "work" in {
-    val testFile = Source.fromURL(getClass.getResource("/basic/test"))
+    val testFile = Source.fromURL(getClass.getResource("/long/test"))
     val test = testFile.getLines().mkString("\n")
 
-    val expectedResultFile = Source.fromURL(getClass.getResource("/basic/expected"))
+    val expectedResultFile = Source.fromURL(getClass.getResource("/long/expected"))
     val expectedResult = expectedResultFile.getLines().mkString("\n")
 
     val myOut = new ByteArrayOutputStream

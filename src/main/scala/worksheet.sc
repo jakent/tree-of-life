@@ -1,18 +1,28 @@
-import tree.Tree
+import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
+import scala.concurrent.duration._
 
 
-Tree("(. . .)").eq(Tree("(. . .)"))
-
-Tree("(. . .)") == Tree("(. . .)")
-
-"[asdf]".replaceAll("\\[|\\]", "")
-
-
-
-(1 to 0).foreach(println("hello", _))
-
-
-Array("hello", "goodbye") match {
-  case Array(f1,f2) => (f1,f2)
-  case _ => ("womp", "womp")
+val f1 = Future{
+  Thread.sleep(2000); "X"
 }
+val f2 = Future{
+  "."
+}
+val f3 = Future{
+  "X"
+}
+
+val p = "q"
+
+val list = List(f1, f2, f3)
+
+val eventualStrings: Future[List[String]] = Future.sequence(list)
+//eventualStrings onComplete {
+//  case Success(value) => println(value)
+//  case Failure(e) => e.printStackTrace()
+//}
+
+
+Await.result(eventualStrings, 10000 seconds).mkString("\n")

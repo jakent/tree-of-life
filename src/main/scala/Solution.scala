@@ -2,8 +2,13 @@ import rules.RuleParser
 import tree.{Leaf, Tree}
 
 import io.Source
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
 object Solution {
+
+  import scala.concurrent.ExecutionContext.Implicits.global
+
 
   def main(args: Array[String]) {
     val lines = Source.stdin.getLines
@@ -16,21 +21,28 @@ object Solution {
     val tree = Tree(serializedTree)
     val tests = lines.take(nTests).toList
 
-    tests.foldLeft(0)((i, command) => {
+    val futures = tests.foldLeft((0, Nil: List[Future[String]]))((i, command) => {
       val iterationsAndDirections = command.split(" ") match {
         case Array(f1, f2) => (f1.toInt, f2)
       }
-      val iterations = i + iterationsAndDirections._1
-      val newTree = (1 to iterations).foldLeft(tree)((t, _) =>
-        Tree.transform(t)(rules.rule)(t))
+      val iterations = i._1 + iterationsAndDirections._1
 
-      println(
-        iterationsAndDirections._2.replaceAll("\\[|\\]", "").foldLeft(newTree)((t, direction) => direction match {
-          case '<' => t.getLeft.getOrElse(Leaf(false))
-          case '>' => t.getRight.getOrElse(Leaf(false))
-        }).isAlive)
+      val future = createFuture(iterations, tree, rules, iterationsAndDirections._2)
 
-      iterations
-    })
+      (iterations, i._2 :+ future)
+    })._2
+
+    val eventualStrings = Future.sequence(futures)
+    println(Await.result(eventualStrings, 10000 seconds).mkString("\n"))
+  }
+
+  def createFuture(iterations: Int, tree: Tree, rules: RuleParser, directions: String): Future[String] = Future {
+    val newTree = (1 to iterations).foldLeft(tree)((t, _) =>
+      Tree.transform(t)(rules.rule)(t))
+
+    directions.replaceAll("\\[|\\]", "").foldLeft(newTree)((t, direction) => direction match {
+      case '<' => t.getLeft.getOrElse(Leaf(false))
+      case '>' => t.getRight.getOrElse(Leaf(false))
+    }).isAlive
   }
 }
