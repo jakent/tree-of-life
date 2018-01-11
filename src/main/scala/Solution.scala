@@ -16,11 +16,12 @@ object Solution {
     val tree = Tree(serializedTree)
     val tests = lines.take(nTests).toList
 
-    tests.foldLeft(tree)((iTree, command) => {
+    tests.foldLeft(0)((i, command) => {
       val iterationsAndDirections = command.split(" ") match {
         case Array(f1, f2) => (f1.toInt, f2)
       }
-      val newTree = (1 to iterationsAndDirections._1).foldLeft(iTree)((t, _) =>
+      val iterations = i + iterationsAndDirections._1
+      val newTree = (1 to iterations).foldLeft(tree)((t, _) =>
         Tree.transform(t)(rules.rule)(t))
 
       println(
@@ -29,7 +30,7 @@ object Solution {
           case '>' => t.getRight.getOrElse(Leaf(false))
         }).isAlive)
 
-      newTree
+      iterations
     })
   }
 }
