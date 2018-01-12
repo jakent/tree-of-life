@@ -37,7 +37,7 @@ object Solution {
 
   def createFuture(iterations: Int, tree: Tree, rules: RuleParser, directions: String): Future[String] = Future {
     val newTree = (1 to iterations).foldLeft(tree)((t, _) =>
-      Tree.transform(t)(rules.rule)(t))
+      Tree.transform(t)(x => rules.rule(Tree.population(t)(x))))
 
     directions.replaceAll("\\[|\\]", "").foldLeft(newTree)((t, direction) => direction match {
       case '<' => t.getLeft.getOrElse(Leaf(false))

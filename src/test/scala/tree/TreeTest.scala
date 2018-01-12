@@ -60,49 +60,51 @@ class TreeTest extends FunSpec with Matchers {
         */
       it("say dead root node with no leaves has a population of 0") {
         val tree = Tree(".")
-        tree.population(tree) shouldEqual 0
+        Tree.population(tree)(tree) shouldEqual 0
       }
 
       it("say alive root node with no leaves has a population of 2") {
         val tree = Tree("X")
-        tree.population(tree) shouldEqual 2
+        Tree.population(tree)(tree) shouldEqual 2
       }
 
       it("say alive branch with one alive leave has a population of 6") {
         val tree = Tree("(X X .)")
-        tree.population(tree) shouldEqual 6
+        Tree.population(tree)(tree) shouldEqual 6
       }
 
       it("say alive branch with alive leaves has a population of 7") {
         val tree = Tree("(X X X)")
-        tree.population(tree) shouldEqual 7
+        Tree.population(tree)(tree) shouldEqual 7
       }
 
       it("say alive branch with alive leaves and parent has a population of 15") {
         val tree = Tree("(. X (X X X))")
-        tree.getRight.get.population(tree) shouldEqual 15
+        Tree.population(tree)(tree.getRight.get) shouldEqual 15
       }
     }
 
     describe("transform") {
       it("transform one") {
         val tree = Tree("(. . .)")
-        Tree.transform(tree)(_ => true)(tree) shouldEqual Tree("(X X X)")
+        Tree.transform(tree)(_ => true) shouldEqual Tree("(X X X)")
       }
 
       it("transform two") {
         val tree = Tree("(. . .)")
-        Tree.transform(tree)(_ => false)(tree) shouldEqual Tree("(. . .)")
+        Tree.transform(tree)(_ => false) shouldEqual Tree("(. . .)")
       }
 
       it("transform three") {
         val tree = Tree("(. . (X X .))")
-        Tree.transform(tree)(RuleParser(42354).rule)(tree) shouldEqual Tree("(. X (X X X))")
+        val f: Tree => Boolean = x => RuleParser(42354).rule(Tree.population(tree)(x))
+        Tree.transform(tree)(f) shouldEqual Tree("(. X (X X X))")
       }
 
       it("transform whole tree based on rules") {
         val tree = Tree("((. X (. . .)) . (X . (. X X)))")
-        Tree.transform(tree)(RuleParser(42354).rule)(tree) shouldEqual Tree("((X . (. X .)) X (. X (X . X)))")
+        val f: Tree => Boolean = x => RuleParser(42354).rule(Tree.population(tree)(x))
+        Tree.transform(tree)(f) shouldEqual Tree("((X . (. X .)) X (. X (X . X)))")
       }
     }
 

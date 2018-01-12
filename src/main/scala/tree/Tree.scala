@@ -6,16 +6,6 @@ sealed trait Tree {
   def getRight: Option[Tree]
 
   def isAlive: String = if (alive) "X" else "."
-
-  def population(root: Tree): Int =
-    Integer.parseInt(
-      booleanToString(Tree.parentAlive(root, this).getOrElse(false)) +
-        booleanToString(getLeft.getOrElse(Leaf(false)).alive) +
-        booleanToString(alive) +
-        booleanToString(getRight.getOrElse(Leaf(false)).alive)
-      , 2)
-
-  private def booleanToString(a: Boolean): String = if (a) "1" else "0"
 }
 
 case class Leaf(alive: Boolean) extends Tree {
@@ -41,9 +31,20 @@ object Tree extends TreeParser {
     }
   }
 
-  def transform(t: Tree)(f: Int => Boolean)(root: Tree): Tree = t match {// move root to f as a curried param
-    case x: Leaf => Leaf(f(x.population(root)))
-    case b@Branch(_, l, r) => Branch(f(b.population(root)), transform(l)(f)(root), transform(r)(f)(root))
+  def population(root: Tree)(node: Tree): Int = {
+    def booleanToString(a: Boolean): String = if (a) "1" else "0"
+
+    Integer.parseInt(
+      booleanToString(Tree.parentAlive(root, node).getOrElse(false)) +
+        booleanToString(node.getLeft.getOrElse(Leaf(false)).alive) +
+        booleanToString(node.alive) +
+        booleanToString(node.getRight.getOrElse(Leaf(false)).alive)
+      , 2)
+  }
+
+  def transform(t: Tree)(f: Tree => Boolean): Tree = t match {
+    case x: Leaf => Leaf(f(x))
+    case b@Branch(_, l, r) => Branch(f(b), transform(l)(f), transform(r)(f))
   }
 
   def apply(initialState: String): Tree =
