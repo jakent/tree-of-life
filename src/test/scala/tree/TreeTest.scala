@@ -24,24 +24,24 @@ class TreeTest extends FunSpec with Matchers {
     describe("parentAlive") {
       it("root should have no parent") {
         val tree = Tree(".")
-        Tree.parentAlive(tree, tree) shouldEqual None
+        tree.parentAlive(tree) shouldEqual false
       }
 
       it("node should find its parent alive") {
         val tree = Tree("(. X .)")
-        Tree.parentAlive(tree, tree.getLeft.get) shouldEqual Some(true)
+        tree.getLeft.get.parentAlive(tree) shouldEqual true
       }
 
       it("node should find its parent dead") {
         val tree = Tree("(. . .)")
-        Tree.parentAlive(tree, tree.getLeft.get) shouldEqual Some(false)
+        tree.getLeft.get.parentAlive(tree) shouldEqual false
       }
 
       it("deep node should find its parent alive") {
         val tree = Tree("(. . (. X (. . .)))")
         val node = tree.getRight.get.getRight.get
         node shouldEqual Branch(false, Leaf(false), Leaf(false))
-        Tree.parentAlive(tree, node) shouldEqual Some(true)
+        node.parentAlive(tree) shouldEqual true
       }
     }
 
