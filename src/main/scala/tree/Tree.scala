@@ -7,8 +7,6 @@ sealed trait Tree {
 
   def isAlive: String = if (alive) "X" else "."
 
-  private def booleanToString(a: Boolean): String = if (a) "1" else "0"
-
   def population(root: Tree): Int =
     Integer.parseInt(
       booleanToString(Tree.parentAlive(root, this).getOrElse(false)) +
@@ -16,6 +14,8 @@ sealed trait Tree {
         booleanToString(alive) +
         booleanToString(getRight.getOrElse(Leaf(false)).alive)
       , 2)
+
+  private def booleanToString(a: Boolean): String = if (a) "1" else "0"
 }
 
 case class Leaf(alive: Boolean) extends Tree {
@@ -30,27 +30,14 @@ case class Branch(alive: Boolean, left: Tree, right: Tree) extends Tree {
 
 object Tree extends TreeParser {
   def parentAlive(root: Tree, node: Tree): Option[Boolean] = {
-    if (root.eq(node)) //check if leaf
-      None
-    else if (root.getLeft.isDefined && root.getLeft.get.eq(node))
-      Some(root.alive)
-    else if (root.getRight.isDefined && root.getRight.get.eq(node))
-      Some(root.alive)
-    else {
-
-      if (root.getLeft.isDefined) { // this is overkill, just check if this is a leaf
-        parentAlive(root.getLeft.get, node) match {
-          case s @ Some(_) => return s
-          case None if root.getRight.isDefined => return parentAlive(root.getRight.get, node)
-          case _ =>  return None
-        }
-      } else if (root.getRight.isDefined) {
-        parentAlive(root.getRight.get, node) match {
-          case s @ Some(_) => return s
-          case _ =>  return None
-        }
+    root match {
+      case _: Leaf => None
+      case s if s.getLeft.isDefined && s.getLeft.get.eq(node) => Some(s.alive)
+      case s if s.getRight.isDefined && s.getRight.get.eq(node) => Some(s.alive)
+      case _ => parentAlive(root.getLeft.get, node) match {
+        case s@Some(_) => s
+        case None if root.getRight.isDefined => parentAlive(root.getRight.get, node)
       }
-      None
     }
   }
 
