@@ -4,21 +4,18 @@ import scala.io.Source
 
 class SolutionTest extends FlatSpec with Matchers {
 
+  def readFileToString(fileName: String): String =
+    Source.fromURL(getClass.getResource(fileName)).getLines().mkString("\n")
+
   "Tree of Life" should "work" in {
-    val testFile = Source.fromURL(getClass.getResource("/long/test"))
-    val test = testFile.getLines().mkString("\n")
-
-    val expectedResultFile = Source.fromURL(getClass.getResource("/long/expected"))
-    val expectedResult = expectedResultFile.getLines().mkString("\n")
-
     val myOut = new ByteArrayOutputStream
     Console.withOut(new PrintStream(myOut)) {
-      System.setIn(new ByteArrayInputStream(test.getBytes()))
+      System.setIn(new ByteArrayInputStream(readFileToString("/basic/test").getBytes()))
 
       Solution.main(Array.empty)
     }
 
-    myOut.toString shouldEqual expectedResult
+    myOut.toString shouldEqual readFileToString("/basic/expected")
   }
 
 }

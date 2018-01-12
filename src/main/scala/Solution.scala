@@ -9,7 +9,6 @@ object Solution {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-
   def main(args: Array[String]) {
     val lines = Source.stdin.getLines
 
